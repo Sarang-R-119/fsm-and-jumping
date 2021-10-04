@@ -4,26 +4,25 @@ class GameObject {
     this.tilemap = [
       'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
       'w                                      w',
-      'wwwwww     wwwwww                      w',
       'w                                      w',
-      'w                                      w',
-      'w                                      w',
-      'w                                      w',
-      'w                                      w',
-      'w                                      w',
-      'w                                      w',
-      'w                                      w',
-      'w                                      w',
-      'w     wwwwww                           w',
-      'w              wwwwwww                 w',
-      'w     wwww                             w',
-      'w           wwwww                      w',
-      'w  wwww                wwwww          w',
-      'w     www         wwwww                w',
-      'wp          wwwww                      w',
+      'wwwwww     www   ww    ww      ww  wwwww',
+      'w       ww                 ww          w',
+      'w              ww  ww          ww      w',
+      'w                                 ww   w',
+      'w                ww                    w',
+      'www       w   w                       ww',
+      'w   ww             ww            ww    w',
+      'w         w   w           ww  ww       w',
+      'w      ww             ww             www',
+      'w                w                ww   w',
+      'w        ww           ww        ww     w',
+      'w     www   ww               ww        w',
+      'ww  w            w      w              w',
+      'w                     ww   ww          w',
+      'w  ww      w  w             ww         w',
+      'ww    w                         ww   p w',
       'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
     ]
-
     this.game_over = false; // Checking if the game is over
     this.game_won = false; // Checking if the game is won
     this.game_state = false; // Checking if the game has loaded
@@ -209,17 +208,22 @@ class Player{
   
     this.velocity.add(this.acceleration);
     
-    if (this.jump == 0 && !this.check_collision_with_walls_Y(5)) {
-      this.jump = 1;
-    }
+    if (this.position.y < 25) {
+        print('Hit the ceiling!');
+        this.position.y = 25;
+      }
     
-    // Ground condition
+    // Landing condition
     if (this.velocity.y > 0 && this.check_collision_with_walls_Y(1)) {
       print('Landed on wall');
       this.position.y -= difference;
       difference = 0;
       this.velocity.y = 0;
       this.jump = 0;
+    }
+    
+    if (this.velocity.y == 0 && !this.check_collision_with_walls_Y(5)){
+      this.jump = 1;
     }
     
     this.position.add(this.velocity);
@@ -229,7 +233,7 @@ class Player{
   move() {
     var deltaX = 0;
 
-    if (keyIsDown(RIGHT_ARROW) && this.x < width - 10){
+    if (keyIsDown(RIGHT_ARROW) && this.x < 800 - 10){
         deltaX = 5;
     }
     if (keyIsDown(LEFT_ARROW) && this.x > 10){
@@ -255,7 +259,7 @@ class Player{
 
 
         if(horizontal_distance <= 19.99 && vertical_distance <= 19.99) {
-          console.log('Collision with wall, xdist: ( ' + gameObj.walls[i].centerX + ',' + this.position.x + '+ 10 + ' + deltaX +')' + horizontal_distance);
+          console.log('Collision with wall, xdist: ' + horizontal_distance);
           return true;
         }
       }
@@ -270,13 +274,12 @@ class Player{
       var horizontal_distance = abs(gameObj.walls[i].centerX - ((this.position.x + 10)));
         var vertical_distance = abs(gameObj.walls[i].centerY - ((this.position.y + 10) + deltaY));
         
-        if(vertical_distance <= 19.99 && horizontal_distance <= 19.99) {
+        if(vertical_distance <= 19.99 && horizontal_distance <= 19.99 && gameObj.walls[i].centerY > (this.position.y + 10) + deltaY) {
           console.log('Collision with wall, ydist: ' + vertical_distance);
-          difference = 20 - vertical_distance;
+          difference = 19 - vertical_distance;
           return true;
-        }
+        }      
       }
-
       return false;
   }
   
@@ -470,7 +473,7 @@ function setup() {
   gravity = new p5.Vector(0, 0.15);
   walkForce = new p5.Vector(0.1, 0);
   backForce = new p5.Vector(-0.1, 0);
-  jumpForce = new p5.Vector(0, -5);
+  jumpForce = new p5.Vector(0, -4);
   // jumpForce2 = new p5.Vector(0, -0.4);
 }
 
@@ -492,6 +495,18 @@ function draw() {
     start_screen.drawInstructions();
   }
   else if(gameObj.game_state) {
+    
+    // Player's position is initialized in the map to be at the right side
+    if(gameObj.player.position.x > width/2) {
+      // If player's position is in the right side, then shift immediately
+      if (gameObj.player.position.x > 600) {
+        translate(-400,0);
+      } else {
+        // Shifts the left side of the map (origin) to the left by the change in distance from mid-section of the screen
+        translate(width/2 - gameObj.player.position.x, 0);
+      }
+    }
+    
     draw_walls();
     gameObj.player.draw();
     gameObj.player.update();
