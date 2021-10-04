@@ -170,7 +170,7 @@ class Player{
   }
 
   draw() {
-    image(custom_elements[0], this.x, this.y, 20,20); 
+    image(custom_elements[0], this.position.x, this.position.y, 20,20); 
 
      this.acceleration.set(0, 0);
     }
@@ -195,10 +195,8 @@ class Player{
     
     // Going to jump
     if (this.jump === 2) {
-      
       this.applyForce(jumpForce);
       this.jump = 1;
-    
     }
     
     // In air
@@ -211,7 +209,7 @@ class Player{
     // Ground condition
     if (this.velocity.y > 0 && this.check_collision_with_walls_Y(1)) {
       this.position.y -= 1;
-      this.velocity = 0;
+      this.velocity.y = 0;
       this.jump = 0;
     }
     
