@@ -50,13 +50,14 @@ class GameObject {
 }
 
 var custom_elements = [];
+var difference = 0;
 
 // Creates a custom wall element
 function customBrick() {
   
   push();
   background(220, 220, 220, 0);
-  strokeWeight(40);
+  // strokeWeight(40);
   stroke(205, 84, 75);
   fill(160, 95, 53);
   rect(0, 0, width, height);
@@ -195,20 +196,28 @@ class Player{
     
     // Going to jump
     if (this.jump === 2) {
+      print('Jumped');
       this.applyForce(jumpForce);
       this.jump = 1;
     }
     
     // In air
     if (this.jump > 0){
+      print('In air');
       this.applyForce(gravity);
     }
   
     this.velocity.add(this.acceleration);
     
+    if (this.jump == 0 && !this.check_collision_with_walls_Y(5)) {
+      this.jump = 1;
+    }
+    
     // Ground condition
     if (this.velocity.y > 0 && this.check_collision_with_walls_Y(1)) {
-      this.position.y -= 1;
+      print('Landed on wall');
+      this.position.y -= difference;
+      difference = 0;
       this.velocity.y = 0;
       this.jump = 0;
     }
@@ -228,7 +237,7 @@ class Player{
     }
 
     // Checking if player collides in X direction
-    if(this.check_collision_with_walls_X(deltaX) == true){
+    if(deltaX != 0 && this.check_collision_with_walls_X(deltaX) == true){
       deltaX = 0;
     }
 
@@ -242,9 +251,11 @@ class Player{
     for (var i=0; i < gameObj.walls.length; i++) {
 
         var horizontal_distance = abs(gameObj.walls[i].centerX - ((this.position.x + 10) + deltaX));
+      var vertical_distance = abs(gameObj.walls[i].centerY - ((this.position.y + 10)));
 
-        if(horizontal_distance <= 19.99) {
-          console.log('Collision with wall, xdist: ' + horizontal_distance);
+
+        if(horizontal_distance <= 19.99 && vertical_distance <= 19.99) {
+          console.log('Collision with wall, xdist: ( ' + gameObj.walls[i].centerX + ',' + this.position.x + '+ 10 + ' + deltaX +')' + horizontal_distance);
           return true;
         }
       }
@@ -256,10 +267,12 @@ class Player{
       
     for (var i=0; i < gameObj.walls.length; i++) {
 
+      var horizontal_distance = abs(gameObj.walls[i].centerX - ((this.position.x + 10)));
         var vertical_distance = abs(gameObj.walls[i].centerY - ((this.position.y + 10) + deltaY));
         
-        if(vertical_distance <= 19.99) {
+        if(vertical_distance <= 19.99 && horizontal_distance <= 19.99) {
           console.log('Collision with wall, ydist: ' + vertical_distance);
+          difference = 20 - vertical_distance;
           return true;
         }
       }
