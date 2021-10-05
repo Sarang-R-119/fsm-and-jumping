@@ -4,22 +4,22 @@ class GameObject {
     this.tilemap = [
       'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
       'w                                      w',
-      'w                                      w',
+      'wd  d            d                    dw',
       'wwwwww     www   ww    ww      ww  wwwww',
       'w       ww                 ww          w',
       'w              ww  ww          ww      w',
-      'w                                 ww   w',
-      'w                ww                    w',
-      'www       w   w                       ww',
+      'w                         d       ww   w',
+      'wd        d      ww       w           dw',
+      'www       w   w    d             d    ww',
       'w   ww             ww            ww    w',
-      'w         w   w           ww  ww       w',
+      'w         w   w       d   ww  ww      dw',
       'w      ww             ww             www',
-      'w                w                ww   w',
-      'w        ww           ww        ww     w',
+      'w        d       w              d ww   w',
+      'w        ww d         ww     d  ww     w',
       'w     www   ww               ww        w',
-      'ww  w            w      w              w',
-      'w                     ww   ww          w',
-      'w  ww      w  w             ww         w',
+      'ww  w            w    d w              w',
+      'w          d          ww   wwd         w',
+      'wd ww      w  w             ww         w',
       'ww    w                         ww   p w',
       'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
     ]
@@ -29,6 +29,7 @@ class GameObject {
     this.instructions_state = false; // Checking if the instructions has loaded
     
     this.walls = [];
+    this.diamonds = [];
     this.player;
   }
 
@@ -39,8 +40,13 @@ class GameObject {
                 case 'w': 
                     this.walls.push(new Wall(j*20, i*20));
                     break; 
+                    
                 case 'p':
                   this.player = new Player(j*20, i*20);
+                  break;
+                
+                case 'd': 
+                  this.diamonds.push(new Diamond(j*20, i*20));
                   break;
             }
         }
@@ -50,6 +56,7 @@ class GameObject {
 
 var custom_elements = [];
 var difference = 0;
+var total_score = 20;
 
 // Creates a custom wall element
 function customBrick() {
@@ -135,7 +142,26 @@ function customPlayer() {
   pop();
 }
 
+function customDiamond() {
+  push();
+  background(220, 220, 220, 0);
+  
+  stroke(6, 140, 105);
+  strokeWeight(30);
+  fill(6, 140, 105);
+  
+  line(200, 0, 100, 200); // L1
+  line(100, 200, 200, 400); // L2
+  line(200, 400, 200, 0); // M1
+  line(100, 200, 300, 200); // M2
+  line(200, 0, 300, 200); // R1
+  line(300, 200, 200, 400); // R2
+  custom_elements.push(get(0, 0, width, height));
+  pop();
+}
+
 function customElements() {
+  customDiamond();
   customPlayer();
   customBrick();
 }
@@ -150,9 +176,40 @@ class Wall{
   }
 
   draw() {
-    image(custom_elements[1], this.x, this.y, 20, 20);
+    image(custom_elements[2], this.x, this.y, 20, 20);
   }
 
+}
+
+// Creates a diamond object
+class Diamond {
+  constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.centerX = x + 10;
+      this.centerY = y + 10;
+      this.stolen = false;
+  }
+
+  draw() {
+      image(custom_elements[0], this.x, this.y, 20, 20);
+  }
+
+  check_theft_by_player() {
+
+      var horizontal_distance = abs((gameObj.player.position.x + 10) - this.centerX);
+      var vertical_distance = abs((gameObj.player.position.y + 10) - this.centerY);
+
+
+      if(horizontal_distance <= 19.99 && vertical_distance <= 19.99) {
+          console.log('Diamonds: Collision with player');
+          this.stolen = true;
+
+          return true;
+      }
+
+      return false;
+  }
 }
 
 class Player{
@@ -167,10 +224,11 @@ class Player{
     this.force = new p5.Vector(0, 0);
     this.currFrame = frameCount;
     this.jump = 0;
+    this.score = 0;
   }
 
   draw() {
-    image(custom_elements[0], this.position.x, this.position.y, 20,20); 
+    image(custom_elements[1], this.position.x, this.position.y, 20,20); 
 
      this.acceleration.set(0, 0);
     }
@@ -408,7 +466,6 @@ class StartScreen{
     //exits to start_screen
   }
 
-
 }
 
 // Start button dimensions
@@ -483,6 +540,17 @@ function draw_walls() {
   }
 }
 
+function draw_diamonds() {
+  var intact_diamonds = 0;
+    for (var i=0; i < gameObj.diamonds.length; i++) {
+        if(!gameObj.diamonds[i].stolen) {
+          gameObj.diamonds[i].draw();
+            intact_diamonds++;
+        }
+    }
+    gameObj.player.score = total_score - intact_diamonds;
+}
+
 function draw() {
   background(220);
 
@@ -494,8 +562,60 @@ function draw() {
   {   
     start_screen.drawInstructions();
   }
+  else if(gameObj.game_over)
+    {
+        // Reinitializing the game
+        gameObj.walls = [];
+        // gameObj.vertical_enemies = [];
+        // gameObj.horizontal_enemies = [];
+        gameObj.enemies = [];
+        gameObj.diamonds = [];
+        gameObj.initTilemap();
+        overBox_start = false;
+        gameObj.player.score = 0;
+      
+        rectMode(CORNER);
+        push();
+          background(100, 135, 152);
+        if (!gameObj.game_won){
+          push();
+            fill(21, 53, 68);
+            textSize(40);
+            text('Game Over!', width/2 - 100, height/2 - 45);
+          pop(); 
+        }
+        else{
+          push();
+            fill(21, 53, 68);
+            textSize(40);
+            text('Game Won!', width/2 - 100, height/2 - 45);
+          pop(); 
+        }
+        push();
+          fill(255);
+          rect(115, 285, 150, 75);
+          fill(0);
+          textSize(40);
+          text('Return', 127.5, 337.5);
+        pop();  
+      pop();
+
+        if (mouseX > 115 &&
+            mouseY > 285 &&
+            mouseX < 250 &&
+            mouseY < 360) {
+              
+            // Focusing on the instructions button.
+            overBox_gameover = false;
+        }
+        else {
+            overBox_gameover = true;
+        }
+        //exits to start_screen
+    }
   else if(gameObj.game_state) {
     
+    push();
     // Player's position is initialized in the map to be at the right side
     if(gameObj.player.position.x > width/2) {
       // If player's position is in the right side, then shift immediately
@@ -508,8 +628,25 @@ function draw() {
     }
     
     draw_walls();
+    draw_diamonds();
     gameObj.player.draw();
     gameObj.player.update();
     gameObj.player.move();
+
+    for (var i=0; i < gameObj.diamonds.length; i++) {
+            
+      gameObj.diamonds[i].check_theft_by_player();
+    }
+    pop();
+
+    push();
+        textSize(20);
+        fill('#542946');
+        text('Score:  ' + gameObj.player.score, 300, 18);
+    pop();
+    if (gameObj.player.score == 20) {
+      gameObj.game_won = true;
+      gameObj.game_over = true;
+    }
   }
 }
