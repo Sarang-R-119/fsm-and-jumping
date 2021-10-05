@@ -5,21 +5,21 @@ class GameObject {
       'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
       'w                                      w',
       'wd  d            d                    dw',
-      'wwwwww     www   ww    ww      ww  wwwww',
-      'w       ww                 ww          w',
-      'w              ww  ww          ww      w',
+      'wwwwwwww   www   wwwww ww      ww  wwwww',
+      'w       www                ww          w',
+      'w          wwwww   ww          ww      w',
       'w                         d       ww   w',
       'wd        d      ww       w           dw',
-      'www       w   w    d             d    ww',
-      'w   ww             ww            ww    w',
-      'w         w   w       d   ww  ww      dw',
+      'www       w   w    d                  ww',
+      'w   wwwwww         ww     e d     w    w',
+      'w         w   w       d   wwwwww      dw',
       'w      ww             ww             www',
       'w        d       w              d ww   w',
       'w        ww d         ww     d  ww     w',
       'w     www   ww               ww        w',
-      'ww  w            w    d w              w',
-      'w          d          ww   wwd         w',
-      'wd ww      w  w             ww         w',
+      'wwwww            w    d w              w',
+      'w          d      wwwwww   wwd         w',
+      'wd wwwwww  w  w             ww         w',
       'ww    w                         ww   p w',
       'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
     ]
@@ -30,6 +30,7 @@ class GameObject {
     
     this.walls = [];
     this.diamonds = [];
+    this.enemies = [];
     this.player;
   }
 
@@ -38,11 +39,15 @@ class GameObject {
         for (var j =0; j < this.tilemap[i].length; j++) {
             switch (this.tilemap[i][j]) {
                 case 'w': 
-                    this.walls.push(new Wall(j*20, i*20));
-                    break; 
+                  this.walls.push(new Wall(j*20, i*20));
+                  break; 
                     
                 case 'p':
                   this.player = new Player(j*20, i*20);
+                  break;
+                  
+                case 'e': 
+                  this.enemies.push(new Enemy(j*20, i*20, 'chase'));
                   break;
                 
                 case 'd': 
@@ -160,8 +165,59 @@ function customDiamond() {
   pop();
 }
 
+function customEnemy() {
+  push();
+    background(220, 220, 220, 0);
+    noStroke();
+    // fill('#8D5524');
+    push();
+      fill(212, 175, 142);
+      rect(50, 0, 300, 400); // face
+    pop();
+
+    push();
+      fill(0);
+      rect(170, 0, 60, 80);
+    pop();
+
+    push();
+      fill(0);
+      rect(60, 130, 130, 80); // left eye shadow
+      rect(210, 130, 130, 80); // right eye shadow
+    pop();
+
+    push();
+      rect(80, 150, 90, 40); // left eye
+      rect(230, 150, 90, 40); // right eye
+    pop();
+
+    push();
+      fill(0);
+      rect(115, 160, 20, 20); // left pupil
+    pop();
+
+    push();
+        fill('#815731');
+        rect(175, 215, 50, 50); // nose
+    pop();
+
+    push();
+      fill('#0A0404');
+      noStroke();
+      rect(140, 330, 125, 30);
+    pop();
+
+    push();
+      fill(0);
+      rect(265, 160, 20, 20); // right pupil
+    pop();
+    custom_elements.push(get(0, 0, width, height));
+  pop();
+}
+
 function customElements() {
   customDiamond();
+  customEnemy();
   customPlayer();
   customBrick();
 }
@@ -176,7 +232,7 @@ class Wall{
   }
 
   draw() {
-    image(custom_elements[2], this.x, this.y, 20, 20);
+    image(custom_elements[3], this.x, this.y, 20, 20);
   }
 
 }
@@ -228,7 +284,7 @@ class Player{
   }
 
   draw() {
-    image(custom_elements[1], this.position.x, this.position.y, 20,20); 
+    image(custom_elements[2], this.position.x, this.position.y, 20,20); 
 
      this.acceleration.set(0, 0);
     }
@@ -302,8 +358,6 @@ class Player{
     if(deltaX != 0 && this.check_collision_with_walls_X(deltaX) == true){
       deltaX = 0;
     }
-
-  // this.check_collision_with_diamonds(deltaX, deltaY);
   
   this.position.x += deltaX;
   }
@@ -342,6 +396,124 @@ class Player{
   }
   
 }
+
+class wanderState {
+  constructor() {
+    // this.wanderDist = 0;
+    // this.step = new p5.Vector(0,0);
+    this.deltaX = 2;
+  }
+  
+  execute(me) {
+    
+    // Checking if enemy collides in X direction or falls off the edge
+    if(me.check_collision_with_walls_X(this.deltaX) || !me.check_collision_with_walls_Y(5)){
+      this.deltaX *= -1;
+      me.jump = 0;
+    }
+  
+    me.position.x += this.deltaX;
+
+    // Checking if it is ready to chase
+    if (dist(me.position.x, me.position.y, gameObj.player.position.x, gameObj.player.position.y) < 120) {
+        me.changeState(1);
+    }
+  }
+}  // wanderState
+
+class chaseState {
+  constructor() {
+    this.step = new p5.Vector(0,0);
+  }
+  
+  execute(me) {
+    var playerX = gameObj.player.position.x;
+    var playerY = gameObj.player.position.y;
+    
+    // if (dist(playerX, playerY, me.position.x, me.position.y) > 5) {
+    this.step.set(playerX - me.position.x, playerY - me.position.y);
+    this.step.normalize();
+    this.step.mult(1);
+    me.position.add(this.step);
+    // }
+    
+    // if()
+
+    if (dist(me.position.x, me.position.y, playerX, playerY) > 150) {
+        me.changeState(0);
+    }
+  }
+}
+
+class Enemy{
+  constructor(x, y){
+        this.x = x;
+        this.y = y;
+        this.position = new p5.Vector(x, y);
+        this.dead = false;
+        this.state = [new wanderState(), new chaseState()];
+        this.currState = 0;
+  }
+
+  changeState(x) {
+    this.currState = x;
+  }
+  
+  draw() {
+    image(custom_elements[1], this.position.x, this.position.y, 20, 20);
+  }
+  
+  check_collision_with_walls_X(deltaX) {
+      
+    for (var i=0; i < gameObj.walls.length; i++) {
+
+        var horizontal_distance = abs(gameObj.walls[i].centerX - ((this.position.x + 10) + deltaX));
+      var vertical_distance = abs(gameObj.walls[i].centerY - ((this.position.y + 10)));
+
+
+        if(horizontal_distance <= 19.99 && vertical_distance <= 19.99) {
+          console.log('Collision with wall, xdist: ' + horizontal_distance);
+          return true;
+        }
+      }
+
+      return false;
+  }
+    
+  check_collision_with_walls_Y(deltaY) {
+      
+    for (var i=0; i < gameObj.walls.length; i++) {
+
+      var horizontal_distance = abs(gameObj.walls[i].centerX - ((this.position.x + 10)));
+        var vertical_distance = abs(gameObj.walls[i].centerY - ((this.position.y + 10) + deltaY));
+        
+        if(vertical_distance <= 19.99 && horizontal_distance <= 19.99 && gameObj.walls[i].centerY > (this.position.y + 10) + deltaY) {
+          console.log('Collision with wall, ydist: ' + vertical_distance);
+          difference = 19 - vertical_distance;
+          return true;
+        }      
+      }
+      return false;
+  }
+  
+  check_collision_with_player() {
+
+        var vertical_distance = abs(gameObj.player.position.y + 10 - (this.position.y));
+        var horizontal_distance = abs(gameObj.player.position.x + 10 - (this.position.x));
+
+        if(vertical_distance <= 19.99 && horizontal_distance <= 19.99) {
+            print('Enemies: Collision with player');
+            gameObj.game_over = true;
+            gameObj.game_state = false;
+            
+            return true;
+        }
+
+        return false;
+    }
+}
+
+
 
 var gravity, walkForce, backForce, jumpForce, jumpForce2;
 function keyPressed() {
@@ -551,6 +723,17 @@ function draw_diamonds() {
     gameObj.player.score = total_score - intact_diamonds;
 }
 
+function draw_enemies() {
+    for (var i=0; i < gameObj.enemies.length; i++) {
+        if(!gameObj.enemies[i].dead) {
+          gameObj.enemies[i].draw();
+          gameObj.enemies[i].state[gameObj.enemies[i].currState].execute(gameObj.enemies[i]);
+          // gameObj.enemies[i].move();
+          // gameObj.enemies[i].chase();
+        }
+    }
+}
+
 function draw() {
   background(220);
 
@@ -629,9 +812,16 @@ function draw() {
     
     draw_walls();
     draw_diamonds();
+    draw_enemies();
     gameObj.player.draw();
     gameObj.player.update();
     gameObj.player.move();
+    
+    for (var i=0; i < gameObj.enemies.length; i++) {
+          if(!gameObj.enemies[i].dead) {
+            gameObj.enemies[i].check_collision_with_player();
+          }
+    }
 
     for (var i=0; i < gameObj.diamonds.length; i++) {
             
