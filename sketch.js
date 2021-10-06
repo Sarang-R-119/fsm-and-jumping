@@ -325,7 +325,7 @@ class Player{
     
     // Going to jump
     if (this.jump === 2) {
-      print('Jumped');
+      print('Player: Jumped');
       this.applyForce(jumpForce);
       this.jump = 1;
     }
@@ -466,20 +466,30 @@ class chaseState {
     var playerX = gameObj.player.position.x;
     var playerY = gameObj.player.position.y;
     
-    // if (dist(playerX, playerY, me.position.x, me.position.y) > 5) {
+    // Calculating the distance between the player and the enemy
     this.step.set(playerX - me.position.x, playerY - me.position.y);
-    // this.step.normalize();
-    // this.step.mult(1);
+    // Normalizing the vector
     this.step.setMag(1); // acceleration of the chase
-    // me.velocity.x = this.step.x;
-    // me.velocity.y = 0;
     
-    // In air
+    // If the player is above the enemy
+    if(me.position.y - playerY > 40 && me.jump == 0) {
+      me.jump = 2;
+    }
+    
+    // Checking if the enemy jumped
+    if (me.jump == 2) {
+      print('Enemy: Jumped');
+      me.applyForce(jumpForce);
+      me.jump = 1;
+    }
+    
+    // Enemy in air
     if (me.jump > 0){
-      print('In air');
+      print('Enemy: In air');
       me.applyForce(gravity);
     }
     
+    // Adding gravity to velocity
     me.velocity.add(me.acceleration);
 
     // Landing condition
@@ -495,6 +505,7 @@ class chaseState {
     if (me.velocity.y == 0 && !me.check_collision_with_walls_Y(5)){
       me.jump = 1;
     }
+    
     // Applying velocity
     me.position.add(me.velocity);
     // Increasing the horizontal distance to chase the player
