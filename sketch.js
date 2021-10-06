@@ -60,7 +60,8 @@ class GameObject {
 }
 
 var custom_elements = [];
-var difference = 0;
+var player_difference = 0;
+var enemy_difference = 0;
 var total_score = 20;
 
 // Creates a custom wall element
@@ -296,17 +297,6 @@ class Player{
   update() {
     this.acceleration.set(0, 0);
     
-//     if (this.walkForward === 1) {
-//       this.applyForce(walkForce);
-//     if (this.walkBackward === 1) {
-//       this.applyForce(backForce);
-// if (this.position.x > 410) {
-//   this.position.x = -10;
-// }
-// else if (this.position.x < -10) {
-//   this.position.x = 410;
-// }
-    
     // Going to jump
     if (this.jump === 2) {
       print('Jumped');
@@ -316,27 +306,29 @@ class Player{
     
     // In air
     if (this.jump > 0){
-      print('In air');
+      print('Player: In air');
       this.applyForce(gravity);
     }
   
     this.velocity.add(this.acceleration);
     
     if (this.position.y < 25) {
-        print('Hit the ceiling!');
+        print('Player: Hit the ceiling!');
         this.position.y = 25;
       }
     
     // Landing condition
     if (this.velocity.y > 0 && this.check_collision_with_walls_Y(1)) {
-      print('Landed on wall');
-      this.position.y -= difference;
-      difference = 0;
+      print('Player: Landed on wall');
+      this.position.y -= player_difference;
+      player_difference = 0;
       this.velocity.y = 0;
       this.jump = 0;
     }
     
+    // Falling condition
     if (this.velocity.y == 0 && !this.check_collision_with_walls_Y(5)){
+      print('Player: Falling');
       this.jump = 1;
     }
     
@@ -388,7 +380,7 @@ class Player{
         
         if(vertical_distance <= 19.99 && horizontal_distance <= 19.99 && gameObj.walls[i].centerY > (this.position.y + 10) + deltaY) {
           console.log('Collision with wall, ydist: ' + vertical_distance);
-          difference = 19 - vertical_distance;
+          player_difference = 19 - vertical_distance;
           return true;
         }      
       }
@@ -406,13 +398,31 @@ class wanderState {
   
   execute(me) {
     
-    // Checking if enemy collides in X direction or falls off the edge
-    if(me.check_collision_with_walls_X(this.deltaX) || !me.check_collision_with_walls_Y(5)){
+    if (me.jump == 1){
+      print('Enemy(wandering): In air');
+      me.applyForce(gravity);
+      me.velocity.add(me.acceleration);
+      me.position.add(me.velocity);
+      
+      if(me.check_collision_with_walls_Y(5)) {
+        me.jump = 0;
+        me.acceleration.set(0,0);
+        me.velocity.set(0,0);
+        me.position.y -= enemy_difference;
+        enemy_difference = 0;
+      }
+    } 
+    else {
+      // Checking if enemy collides in X direction or falls off the edge
+      if(me.check_collision_with_walls_X(this.deltaX) || !me.check_collision_with_walls_Y(5)){
       this.deltaX *= -1;
       me.jump = 0;
     }
   
     me.position.x += this.deltaX;
+    }
+    
+    
 
     // Checking if it is ready to chase
     if (dist(me.position.x, me.position.y, gameObj.player.position.x, gameObj.player.position.y) < 120) {
@@ -432,15 +442,49 @@ class chaseState {
     
     // if (dist(playerX, playerY, me.position.x, me.position.y) > 5) {
     this.step.set(playerX - me.position.x, playerY - me.position.y);
-    this.step.normalize();
-    this.step.mult(1);
-    me.position.add(this.step);
-    // }
+    // this.step.normalize();
+    // this.step.mult(1);
+    this.step.setMag(1); // acceleration of the chase
+    // me.velocity.x = this.step.x;
+    // me.velocity.y = 0;
     
-    // if()
+    // In air
+    if (me.jump > 0){
+      print('In air');
+      me.applyForce(gravity);
+    }
+    
+    me.velocity.add(me.acceleration);
+
+    // Landing condition
+    if (me.velocity.y > 0 && me.check_collision_with_walls_Y(1)) {
+      print('Enemy: Landed on wall');
+      me.position.y -= enemy_difference;
+      enemy_difference = 0;
+      me.velocity.y = 0;
+      me.jump = 0;
+    }
+    
+    // Falling condition
+    if (me.velocity.y == 0 && !me.check_collision_with_walls_Y(5)){
+      me.jump = 1;
+    }
+    // Applying velocity
+    me.position.add(me.velocity);
+    // Increasing the horizontal distance to chase the player
+    me.position.x += this.step.x;
+    me.acceleration.set(0, 0);
+
 
     if (dist(me.position.x, me.position.y, playerX, playerY) > 150) {
-        me.changeState(0);
+      
+      // Checking if the player has landed before wandering  
+      if( !me.check_collision_with_walls_Y(5)){
+        
+        // If enemy has not landed, the enemy is in mid-air
+        me.jump = 1;
+      }
+      me.changeState(0);
     }
   }
 }
@@ -450,6 +494,9 @@ class Enemy{
         this.x = x;
         this.y = y;
         this.position = new p5.Vector(x, y);
+        this.velocity = new p5.Vector(0, 0);
+        this.acceleration = new p5.Vector(0, 0);
+        this.force = new p5.Vector(0, 0);
         this.dead = false;
         this.state = [new wanderState(), new chaseState()];
         this.currState = 0;
@@ -461,6 +508,12 @@ class Enemy{
   
   draw() {
     image(custom_elements[1], this.position.x, this.position.y, 20, 20);
+    
+    this.acceleration.set(0, 0);
+  }
+
+  applyForce(force) {
+    this.acceleration.add(force);
   }
   
   check_collision_with_walls_X(deltaX) {
@@ -485,11 +538,11 @@ class Enemy{
     for (var i=0; i < gameObj.walls.length; i++) {
 
       var horizontal_distance = abs(gameObj.walls[i].centerX - ((this.position.x + 10)));
-        var vertical_distance = abs(gameObj.walls[i].centerY - ((this.position.y + 10) + deltaY));
+      var vertical_distance = abs(gameObj.walls[i].centerY - ((this.position.y + 10) + deltaY));
         
         if(vertical_distance <= 19.99 && horizontal_distance <= 19.99 && gameObj.walls[i].centerY > (this.position.y + 10) + deltaY) {
-          console.log('Collision with wall, ydist: ' + vertical_distance);
-          difference = 19 - vertical_distance;
+          console.log('Enemy: Collision with wall, ydist: ' + vertical_distance);
+          enemy_difference = 19 - vertical_distance;
           return true;
         }      
       }
