@@ -188,6 +188,17 @@ function customEnemy() {
     pop();
 
     push();
+      fill(255, 0, 0);
+      rect(50, 190, 40, 20); // left blood stroke 1
+      rect(50, 230, 40, 20); // left blood stroke 2
+      rect(50, 270, 40, 20); // left blood stroke 3
+
+      rect(310, 190, 40, 20); // right blood stroke 1
+      rect(310, 230, 40, 20); // right blood stroke 2
+      rect(310, 270, 40, 20); // right blood stroke 3
+    pop();
+
+    push();
       rect(80, 150, 90, 40); // left eye
       rect(230, 150, 90, 40); // right eye
     pop();
@@ -198,19 +209,30 @@ function customEnemy() {
     pop();
 
     push();
-        fill('#815731');
-        rect(175, 215, 50, 50); // nose
-    pop();
-
-    push();
-      fill('#0A0404');
-      noStroke();
-      rect(140, 330, 125, 30);
-    pop();
-
-    push();
       fill(0);
       rect(265, 160, 20, 20); // right pupil
+    pop();
+
+    push();
+      fill('#815731');
+      rect(175, 215, 50, 50); // nose
+    pop();
+
+    push();
+      fill('#3E0F0F');
+      noStroke();
+      rect(140, 330, 125, 30); 
+      rect(140, 360, 20, 20);
+      rect(245, 360, 20, 20);
+    pop();
+
+    push();
+      stroke(255);
+      strokeWeight(10);
+      line(170, 345, 235, 345);
+      stroke(0);
+      strokeWeight(2);
+      line(170, 345, 235, 345);
     pop();
     custom_elements.push(get(0, 0, width, height));
   pop();
