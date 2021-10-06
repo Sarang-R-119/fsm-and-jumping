@@ -10,6 +10,9 @@
 // DATE:    October 5, 2021
 
 
+// Created by : Sarang V Rajeev
+
+
 var custom_elements = [];
 var player_difference = 0;
 var enemy_difference = 0;
@@ -21,18 +24,6 @@ function customBrick() {
   
   push();
   background(220, 220, 220, 0);
-//   strokeWeight(40);
-//   stroke('#392213');
-//   fill(160, 95, 53);
-//   rect(20, 20, width - 40, height - 40);
-  
-//   push();
-//     stroke(0);
-//     strokeWeight(10);
-//     line(40, 200, 360, 200);
-//     line(125, 40, 125, 200);
-//     line(250, 200, 250, 360);
-//   pop();
   
   fill('#392213');
   
@@ -116,20 +107,9 @@ function customPlayer() {
   pop();
 }
 
-function customDiamond() {
+function customPrizes() {
   push();
   background(220, 220, 220, 0);
-  
-//   stroke(6, 140, 105);
-//   strokeWeight(30);
-//   fill(6, 140, 105);
-  
-//   line(200, 0, 100, 200); // L1
-//   line(100, 200, 200, 400); // L2
-//   line(200, 400, 200, 0); // M1
-//   line(100, 200, 300, 200); // M2
-//   line(200, 0, 300, 200); // R1
-//   line(300, 200, 200, 400); // R2
   
   push();
     background(220, 220, 220, 0);
@@ -320,10 +300,20 @@ function customCactus() {
 
 function customElements() {
   customCactus();
-  customDiamond();
+  customPrizes();
   customEnemy();
   customPlayer();
   customBrick();
+}
+
+class Cactus{
+  constructor(x, y){
+    this.x = x;
+    this.y = y;
+  }
+  draw(){
+    image(custom_elements[0], this.x, this.y, 20, 20) ;
+  }
 }
 
 // Creates a wall object
@@ -372,8 +362,9 @@ class GameObject {
     this.instructions_state = false; // Checking if the instructions has loaded
     
     this.walls = [];
-    this.diamonds = [];
+    this.prizes = [];
     this.enemies = [];
+    this.cacti = [];
     this.player;
   }
 
@@ -394,11 +385,11 @@ class GameObject {
                   break;
                 
                 case 'd': 
-                  this.diamonds.push(new Diamond(j*20, i*20));
+                  this.prizes.push(new Prize(j*20, i*20));
                   break;
                   
                 case 'c':
-                  image(custom_elements[0], j*20, i*20, 20, 20) ;
+                  this.cacti.push(new Cactus(j*20, i*20));
                   break;
             }
         }
@@ -407,8 +398,8 @@ class GameObject {
 }
 
 
-// Creates a diamond object
-class Diamond {
+// Creates a Prize object
+class Prize {
   constructor(x, y) {
       this.x = x;
       this.y = y;
@@ -428,7 +419,7 @@ class Diamond {
 
 
       if(horizontal_distance <= 19.99 && vertical_distance <= 19.99) {
-          console.log('Diamonds: Collision with player');
+          console.log('Prizes: Collision with player');
           this.stolen = true;
 
           return true;
@@ -524,7 +515,8 @@ class Player{
       deltaX = 0;
     }
   
-  this.position.x += deltaX;
+  this.position.add(deltaX, 0);
+
   }
 
   check_collision_with_walls_X(deltaX) {
@@ -639,6 +631,12 @@ class chaseState {
     // Adding gravity to velocity
     me.velocity.add(me.acceleration);
 
+    // Checking if the enemy hit the ceiling
+    if (me.position.y < 25) {
+      print('Enemy: Hit the ceiling!');
+      me.position.y = 25;
+    }
+
     // Landing condition
     if (me.velocity.y > 0 && me.check_collision_with_walls_Y(1)) {
       print('Enemy: Landed on wall');
@@ -737,47 +735,31 @@ class Enemy{
   
   check_collision_with_player() {
 
-        var vertical_distance = abs(gameObj.player.position.y + 10 - (this.position.y));
-        var horizontal_distance = abs(gameObj.player.position.x + 10 - (this.position.x));
+    var vertical_distance = abs(gameObj.player.position.y + 10 - (this.position.y + 10));
+    var horizontal_distance = abs(gameObj.player.position.x + 10 - (this.position.x + 10));
 
-        if(vertical_distance <= 19.99 && horizontal_distance <= 19.99) {
-            
-          print('Enemies: Collision with player');
-          
-          // Checking if the player killed the enemy from above
-          if (gameObj.player.position.y < this.position.y && horizontal_distance <= 10){
-             this.dead = true;
-          }
-          else {
-          // The player got killed by the enemy
-             gameObj.game_over = true;
-             gameObj.game_state = false; 
-          }
-            
-            return true;
-        }
-
-        return false;
+    if(vertical_distance <= 19.99 && horizontal_distance <= 19.99) {
+        
+      print('Enemies: Collision with player');
+      
+      // Checking if the player killed the enemy from above
+      if (gameObj.player.position.y < this.position.y && horizontal_distance <= 17){
+          this.dead = true;
+      }
+      else {
+      // The player got killed by the enemy
+          gameObj.game_over = true;
+          gameObj.game_state = false; 
+      }
+        
+        return true;
     }
+
+    return false;
+  }
 }
 
-
-
-var gravity, walkForce, backForce, jumpForce, jumpForce2;
-// function keyPressed() {
-//   if ((keyCode === 32) && (gameObj.player.jump === 0)) {
-//     gameObj.player.jump = 2;
-//   }
-// }
-
-// function keyReleased() {
-//   if (keyCode === RIGHT_ARROW) {
-//     gameObj.player.walkForward = 0;
-//   }
-//   else if (keyCode === LEFT_ARROW) {
-//     gameObj.player.walkBackward = 0;
-//   }
-// }
+var gravity, walkForce, backForce, jumpForce;
 
 class StartScreen{
   constructor(x, y){
@@ -940,10 +922,14 @@ function mousePressed() {
 
 var bg_wall = [];
 function create_bg(){
-          for (var i = 0; i< 400; i++) {
-            for (var j =0; j < 400; j++) {
-              if((i + j) % 2 == 0){
-            bg_wall.push( new Wall(j*20, i*20));}}}
+  for (var i = 0; i< 400; i++) {
+    for (var j =0; j < 400; j++) {
+      
+      if((i + j) % 2 == 0){
+        bg_wall.push( new Wall(j*20, i*20));
+      }
+    }
+  }
 }
 
 function setup() {
@@ -961,7 +947,6 @@ function setup() {
   walkForce = new p5.Vector(0.1, 0);
   backForce = new p5.Vector(-0.1, 0);
   jumpForce = new p5.Vector(0, -4);
-  // jumpForce2 = new p5.Vector(0, -0.4);
 }
 
 function draw_walls() {
@@ -970,34 +955,37 @@ function draw_walls() {
   }
 }
 
-function draw_diamonds() {
-  var intact_diamonds = 0;
-    for (var i=0; i < gameObj.diamonds.length; i++) {
-        if(!gameObj.diamonds[i].stolen) {
-          gameObj.diamonds[i].draw();
-            intact_diamonds++;
+function draw_prizes() {
+  var intact_prizes = 0;
+    for (var i=0; i < gameObj.prizes.length; i++) {
+        if(!gameObj.prizes[i].stolen) {
+          gameObj.prizes[i].draw();
+            intact_prizes++;
         }
     }
-    gameObj.player.score = total_score - intact_diamonds;
+    gameObj.player.score = total_score - intact_prizes;
 }
 
 function draw_enemies() {
-    for (var i=0; i < gameObj.enemies.length; i++) {
-        if(!gameObj.enemies[i].dead) {
-          gameObj.enemies[i].draw();
-          gameObj.enemies[i].state[gameObj.enemies[i].currState].execute(gameObj.enemies[i]);
-          // gameObj.enemies[i].move();
-          // gameObj.enemies[i].chase();
-        }
-    }
+  for (var i=0; i < gameObj.enemies.length; i++) {
+      if(!gameObj.enemies[i].dead) {
+        gameObj.enemies[i].draw();
+        gameObj.enemies[i].state[gameObj.enemies[i].currState].execute(gameObj.enemies[i]);
+
+      }
+  }
 }
 
-
+function draw_cacti() {
+ for( var i = 0; i < gameObj.cacti.length; i++) {
+     gameObj.cacti[i].draw();
+ }
+}
   
 function draw_bg(){
-          for (var i = 0; i< bg_wall.length; i++) {
-              bg_wall[i].draw();
-            }
+  for (var i = 0; i< bg_wall.length; i++) {
+      bg_wall[i].draw();
+    }
 }
 
 function draw() {
@@ -1018,7 +1006,8 @@ function draw() {
         // gameObj.vertical_enemies = [];
         // gameObj.horizontal_enemies = [];
         gameObj.enemies = [];
-        gameObj.diamonds = [];
+        gameObj.prizes = [];
+        gameObj.cacti = [];
         gameObj.initTilemap();
         overBox_start = false;
         gameObj.player.score = 0;
@@ -1081,8 +1070,9 @@ function draw() {
     }
     
     draw_walls();
-    draw_diamonds();
+    draw_prizes();
     draw_enemies();
+    draw_cacti();
     gameObj.player.draw();
     gameObj.player.update();
     gameObj.player.move();
@@ -1093,9 +1083,9 @@ function draw() {
           }
     }
 
-    for (var i=0; i < gameObj.diamonds.length; i++) {
+    for (var i=0; i < gameObj.prizes.length; i++) {
             
-      gameObj.diamonds[i].check_theft_by_player();
+      gameObj.prizes[i].check_theft_by_player();
     }
     pop();
 
