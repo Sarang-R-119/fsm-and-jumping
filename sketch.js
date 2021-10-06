@@ -568,7 +568,7 @@ class Enemy{
         
         if(vertical_distance <= 19.99 && horizontal_distance <= 19.99 && gameObj.walls[i].centerY > (this.position.y + 10) + deltaY) {
           console.log('Enemy: Collision with wall, ydist: ' + vertical_distance);
-          enemy_difference = 19 - vertical_distance;
+          enemy_difference = (19 - vertical_distance);
           return true;
         }      
       }
@@ -581,9 +581,18 @@ class Enemy{
         var horizontal_distance = abs(gameObj.player.position.x + 10 - (this.position.x));
 
         if(vertical_distance <= 19.99 && horizontal_distance <= 19.99) {
-            print('Enemies: Collision with player');
-            gameObj.game_over = true;
-            gameObj.game_state = false;
+            
+          print('Enemies: Collision with player');
+          
+          // Checking if the player killed the enemy
+          if (gameObj.player.position.y < this.position.y){
+             this.dead = true;
+          }
+          else {
+          // The player got killed by the enemy
+             gameObj.game_over = true;
+             gameObj.game_state = false; 
+          }
             
             return true;
         }
@@ -601,14 +610,14 @@ var gravity, walkForce, backForce, jumpForce, jumpForce2;
 //   }
 // }
 
-function keyReleased() {
-  if (keyCode === RIGHT_ARROW) {
-    gameObj.player.walkForward = 0;
-  }
-  else if (keyCode === LEFT_ARROW) {
-    gameObj.player.walkBackward = 0;
-  }
-}
+// function keyReleased() {
+//   if (keyCode === RIGHT_ARROW) {
+//     gameObj.player.walkForward = 0;
+//   }
+//   else if (keyCode === LEFT_ARROW) {
+//     gameObj.player.walkBackward = 0;
+//   }
+// }
 
 class StartScreen{
   constructor(x, y){
