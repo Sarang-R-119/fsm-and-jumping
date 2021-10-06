@@ -308,7 +308,11 @@ class Player{
 
   draw() {
     image(custom_elements[2], this.position.x, this.position.y, 20,20); 
-
+    
+    if (keyIsDown(UP_ARROW) && (this.jump === 0)) {
+      this.jump = 2;
+    }
+    
      this.acceleration.set(0, 0);
     }
 
@@ -591,11 +595,11 @@ class Enemy{
 
 
 var gravity, walkForce, backForce, jumpForce, jumpForce2;
-function keyPressed() {
-  if ((keyCode === 32) && (gameObj.player.jump === 0)) {
-    gameObj.player.jump = 2;
-  }
-}
+// function keyPressed() {
+//   if ((keyCode === 32) && (gameObj.player.jump === 0)) {
+//     gameObj.player.jump = 2;
+//   }
+// }
 
 function keyReleased() {
   if (keyCode === RIGHT_ARROW) {
