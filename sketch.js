@@ -4,21 +4,21 @@ class GameObject {
     this.tilemap = [
       'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
       'w                                      w',
-      'wd  d            d                    dw',
+      'wde d            de                 e dw',
       'wwwwwwww   www   wwwww ww      ww  wwwww',
-      'w       www                ww          w',
+      'w       wwwe               ww          w',
       'w          wwwww   ww          ww      w',
       'w                         d       ww   w',
       'wd        d      ww       w           dw',
-      'www       w   w    d                  ww',
+      'www e     w   w    d                  ww',
       'w   wwwwww         ww     e d     w    w',
       'w         w   w       d   wwwwww      dw',
       'w      ww             ww             www',
       'w        d       w              d ww   w',
       'w        ww d         ww     d  ww     w',
       'w     www   ww               ww        w',
-      'wwwww            w    d w              w',
-      'w          d      wwwwww   wwd         w',
+      'wwwww            w e  d w              w',
+      'w  e       d      wwwwww   wwd         w',
       'wd wwwwww  w  w             ww         w',
       'ww    w                         ww   p w',
       'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
@@ -402,7 +402,7 @@ class Player{
     for (var i=0; i < gameObj.walls.length; i++) {
 
       var horizontal_distance = abs(gameObj.walls[i].centerX - ((this.position.x + 10)));
-        var vertical_distance = abs(gameObj.walls[i].centerY - ((this.position.y + 10) + deltaY));
+      var vertical_distance = abs(gameObj.walls[i].centerY - ((this.position.y + 10) + deltaY));
         
         if(vertical_distance <= 19.99 && horizontal_distance <= 19.99 && gameObj.walls[i].centerY > (this.position.y + 10) + deltaY) {
           console.log('Collision with wall, ydist: ' + vertical_distance);
@@ -469,7 +469,7 @@ class chaseState {
     // Calculating the distance between the player and the enemy
     this.step.set(playerX - me.position.x, playerY - me.position.y);
     // Normalizing the vector
-    this.step.setMag(1); // acceleration of the chase
+    this.step.setMag(0.7); // acceleration of the chase
     
     // If the player is above the enemy
     if(me.position.y - playerY > 40 && me.jump == 0) {
@@ -509,7 +509,9 @@ class chaseState {
     // Applying velocity
     me.position.add(me.velocity);
     // Increasing the horizontal distance to chase the player
-    me.position.x += this.step.x;
+    if (!me.check_collision_with_walls_X(this.step.x)){
+     me.position.x += this.step.x; 
+    }
     me.acceleration.set(0, 0);
 
 
@@ -595,8 +597,8 @@ class Enemy{
             
           print('Enemies: Collision with player');
           
-          // Checking if the player killed the enemy
-          if (gameObj.player.position.y < this.position.y){
+          // Checking if the player killed the enemy from above
+          if (gameObj.player.position.y < this.position.y && horizontal_distance <= 10){
              this.dead = true;
           }
           else {
