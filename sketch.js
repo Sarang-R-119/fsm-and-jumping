@@ -1,4 +1,13 @@
-// Created by : Sarang V Rajeev
+// sketch.js
+// Description: The 'Treasure Hunter: Jumping Frenzy' is a platformer game
+// where the user has to move the player with the keys described in the ins-
+// tructions page to collect all prizes and dodge all enemies. The enemies chase
+// you when you are close by and can only be killed by jumping on top of
+// them. Collecting all 20 prizes will win you the game.
+//
+// AUTHOR:  Sarang Vadi Rajeev
+// COURSE:  ECE 4525
+// DATE:    October 5, 2021
 
 
 var custom_elements = [];
