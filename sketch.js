@@ -1,78 +1,37 @@
-class GameObject {
-  constructor() {
+// Created by : Sarang V Rajeev
 
-    this.tilemap = [
-      'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
-      'w                                      w',
-      'wde d            de                 e dw',
-      'wwwwwwww   www   wwwww ww      ww  wwwww',
-      'w       wwwe               ww          w',
-      'w          wwwww   ww          ww      w',
-      'w                         d       ww   w',
-      'wd        d      ww       w           dw',
-      'www e     w   w    d                  ww',
-      'w   wwwwww         ww     e d     w    w',
-      'w         w   w       d   wwwwww      dw',
-      'w      ww             ww             www',
-      'w        d       w              d ww   w',
-      'w        ww d         ww     d  ww     w',
-      'w     www   ww               ww        w',
-      'wwwww            w e  d w              w',
-      'w  e       d      wwwwww   wwd         w',
-      'wd wwwwww  w  w             ww         w',
-      'ww    w                         ww   p w',
-      'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
-    ]
-    this.game_over = false; // Checking if the game is over
-    this.game_won = false; // Checking if the game is won
-    this.game_state = false; // Checking if the game has loaded
-    this.instructions_state = false; // Checking if the instructions has loaded
-    
-    this.walls = [];
-    this.diamonds = [];
-    this.enemies = [];
-    this.player;
-  }
-
-  initTilemap() {
-    for (var i = 0; i< this.tilemap.length; i++) {
-        for (var j =0; j < this.tilemap[i].length; j++) {
-            switch (this.tilemap[i][j]) {
-                case 'w': 
-                  this.walls.push(new Wall(j*20, i*20));
-                  break; 
-                    
-                case 'p':
-                  this.player = new Player(j*20, i*20);
-                  break;
-                  
-                case 'e': 
-                  this.enemies.push(new Enemy(j*20, i*20, 'chase'));
-                  break;
-                
-                case 'd': 
-                  this.diamonds.push(new Diamond(j*20, i*20));
-                  break;
-            }
-        }
-      }
-  }
-}
 
 var custom_elements = [];
 var player_difference = 0;
 var enemy_difference = 0;
 var total_score = 20;
 
+
 // Creates a custom wall element
 function customBrick() {
   
   push();
   background(220, 220, 220, 0);
-  // strokeWeight(40);
-  stroke(205, 84, 75);
-  fill(160, 95, 53);
+//   strokeWeight(40);
+//   stroke('#392213');
+//   fill(160, 95, 53);
+//   rect(20, 20, width - 40, height - 40);
+  
+//   push();
+//     stroke(0);
+//     strokeWeight(10);
+//     line(40, 200, 360, 200);
+//     line(125, 40, 125, 200);
+//     line(250, 200, 250, 360);
+//   pop();
+  
+  fill('#392213');
+  
   rect(0, 0, width, height);
+  push();
+  fill(160, 95, 53);
+    rect(40, 40, width - 80, height - 80);
+  pop();
   custom_elements.push(get(0, 0, width, height));
   pop();
 }
@@ -152,16 +111,98 @@ function customDiamond() {
   push();
   background(220, 220, 220, 0);
   
-  stroke(6, 140, 105);
-  strokeWeight(30);
-  fill(6, 140, 105);
+//   stroke(6, 140, 105);
+//   strokeWeight(30);
+//   fill(6, 140, 105);
   
-  line(200, 0, 100, 200); // L1
-  line(100, 200, 200, 400); // L2
-  line(200, 400, 200, 0); // M1
-  line(100, 200, 300, 200); // M2
-  line(200, 0, 300, 200); // R1
-  line(300, 200, 200, 400); // R2
+//   line(200, 0, 100, 200); // L1
+//   line(100, 200, 200, 400); // L2
+//   line(200, 400, 200, 0); // M1
+//   line(100, 200, 300, 200); // M2
+//   line(200, 0, 300, 200); // R1
+//   line(300, 200, 200, 400); // R2
+  
+  push();
+    background(220, 220, 220, 0);
+    noStroke();
+    // fill('#8D5524');
+    push();
+      fill('#FFD700');
+      rect(50, 0, 300, 400); // face
+    pop();
+  
+    push();
+      fill('#CD853F');
+      rect(50, 0, 300, 100);
+    pop();
+  
+    push();
+      fill('#8B4513');
+      push();
+        translate(100, 25);
+        rotate(PI/4);
+        rect(0, 0, 50, 50);
+      pop();
+  
+      push();
+        translate(200, 25);
+        rotate(PI/4);
+      rect(0, 0, 50, 50);
+      pop();
+  
+      push();
+        translate(300, 25);
+        rotate(PI/4);
+        rect(0, 0, 50, 50);
+      pop();
+    pop();
+
+    push();
+    fill('#D4AF37')
+      push();
+        translate(125, 160);
+  rotate(PI/4);
+        rect(0, 0, 75, 75); // left eye
+      pop();
+      push();
+        translate(275, 160);
+        rotate(PI/4);
+        rect(0, 0, 75, 75); // right eye
+      pop();
+    pop();
+
+    push();
+      fill(0);
+      rect(115, 200, 20, 20); // left pupil
+    pop();
+
+    push();
+      fill(0);
+      rect(265, 200, 20, 20); // right pupil
+    pop();
+
+    push();
+      fill('#815731');
+      rect(175, 230, 50, 50); // nose
+    pop();
+
+    push();
+      fill('#3E0F0F');
+      noStroke();
+      rect(140, 330, 125, 30); 
+      // rect(140, 360, 20, 20);
+      // rect(245, 360, 20, 20);
+    pop();
+
+    push();
+      stroke(255);
+      strokeWeight(10);
+      line(170, 345, 235, 345);
+      stroke(0);
+      strokeWeight(2);
+    // line(170, 345, 235, 345);
+    pop();
+
   custom_elements.push(get(0, 0, width, height));
   pop();
 }
@@ -238,7 +279,38 @@ function customEnemy() {
   pop();
 }
 
+function customCactus() {
+  
+  push();
+    background(220, 220, 220, 0);
+  noStroke();
+  fill('#237543');
+  rect(150, 0, 100, 400); // main stem
+  
+  rect(25, 100, 75, 150) // left upper branch
+  rect(25, 250, 225, 75); // left lower branch
+  
+  rect(300, 50, 75, 125); // right upper branch
+  rect(250, 175, 125, 75); // right lower branch
+  
+  push();
+    fill('#131812');
+    // strokeWeight(20);
+    translate(75, 150);
+    rotate(PI/4);
+    rect(0, 0, 20, 20);
+    rect(20, -190, 20, 20);
+    rect(200, -175, 20, 20);
+    rect(240, 20, 20, 20);
+    rect(120, -40, 20, 20);
+    translate(-75, -150);
+  pop();
+  custom_elements.push(get(0, 0, width, height));
+  pop();
+}
+
 function customElements() {
+  customCactus();
   customDiamond();
   customEnemy();
   customPlayer();
@@ -255,10 +327,76 @@ class Wall{
   }
 
   draw() {
-    image(custom_elements[3], this.x, this.y, 20, 20);
+    image(custom_elements[4], this.x, this.y, 20, 20);
   }
 
 }
+
+class GameObject {
+  constructor() {
+
+    this.tilemap = [
+      'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
+      'w                                      w',
+      'wde d c          de                 e dw',
+      'wwwwwwww   www   wwwww ww      ww  wwwww',
+      'w       wwwe               ww          w',
+      'w          wwwww   ww          ww      w',
+      'w                         d       ww   w',
+      'wd        d      ww       w           dw',
+      'www e  c  w   w    d                  ww',
+      'w   wwwwww         ww     e d c   w    w',
+      'w         w   w       d   wwwwww      dw',
+      'w      ww             ww             www',
+      'w        d       w              d ww   w',
+      'w        ww d         ww     d  ww     w',
+      'w     www   ww               ww        w',
+      'wwwww            w e cd w              w',
+      'w  e  c    d      wwwwww   wwd         w',
+      'wd wwwwww  w  w             ww         w',
+      'ww    w    c            c       ww   p w',
+      'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
+    ]
+    this.game_over = false; // Checking if the game is over
+    this.game_won = false; // Checking if the game is won
+    this.game_state = false; // Checking if the game has loaded
+    this.instructions_state = false; // Checking if the instructions has loaded
+    
+    this.walls = [];
+    this.diamonds = [];
+    this.enemies = [];
+    this.player;
+  }
+
+  initTilemap() {
+    for (var i = 0; i< this.tilemap.length; i++) {
+        for (var j =0; j < this.tilemap[i].length; j++) {
+            switch (this.tilemap[i][j]) {
+                case 'w': 
+                  this.walls.push(new Wall(j*20, i*20));
+                  break; 
+                    
+                case 'p':
+                  this.player = new Player(j*20, i*20);
+                  break;
+                  
+                case 'e': 
+                  this.enemies.push(new Enemy(j*20, i*20, 'chase'));
+                  break;
+                
+                case 'd': 
+                  this.diamonds.push(new Diamond(j*20, i*20));
+                  break;
+                  
+                case 'c':
+                  image(custom_elements[0], j*20, i*20, 20, 20) ;
+                  break;
+            }
+        }
+      }
+  }
+}
+
 
 // Creates a diamond object
 class Diamond {
@@ -271,7 +409,7 @@ class Diamond {
   }
 
   draw() {
-      image(custom_elements[0], this.x, this.y, 20, 20);
+      image(custom_elements[1], this.x, this.y, 20, 20);
   }
 
   check_theft_by_player() {
@@ -307,7 +445,7 @@ class Player{
   }
 
   draw() {
-    image(custom_elements[2], this.position.x, this.position.y, 20,20); 
+    image(custom_elements[3], this.position.x, this.position.y, 20,20); 
     
     if (keyIsDown(UP_ARROW) && (this.jump === 0)) {
       this.jump = 2;
@@ -546,7 +684,7 @@ class Enemy{
   }
   
   draw() {
-    image(custom_elements[1], this.position.x, this.position.y, 20, 20);
+    image(custom_elements[2], this.position.x, this.position.y, 20, 20);
     
     this.acceleration.set(0, 0);
   }
@@ -686,10 +824,10 @@ class StartScreen{
       text("5. You can't pass through the walls", 20, 300);
 
       fill(255);
-      rect(115, 285, 150, 75);
+      rect(115, 305, 150, 75);
       fill(0);
       textSize(40);
-      text('Return', 127.5, 337.5);
+      text('Return', 127.5, 357.5);
     pop();
 
     this.checkReturnButton();
@@ -791,6 +929,14 @@ function mousePressed() {
   }
 }
 
+var bg_wall = [];
+function create_bg(){
+          for (var i = 0; i< 400; i++) {
+            for (var j =0; j < 400; j++) {
+              if((i + j) % 2 == 0){
+            bg_wall.push( new Wall(j*20, i*20));}}}
+}
+
 function setup() {
   createCanvas(400, 400);
 
@@ -799,6 +945,8 @@ function setup() {
   
   customElements();
   gameObj.initTilemap();
+  
+  create_bg();
 
   gravity = new p5.Vector(0, 0.15);
   walkForce = new p5.Vector(0.1, 0);
@@ -835,8 +983,16 @@ function draw_enemies() {
     }
 }
 
+
+  
+function draw_bg(){
+          for (var i = 0; i< bg_wall.length; i++) {
+              bg_wall[i].draw();
+            }
+}
+
 function draw() {
-  background(220);
+  background(241, 216, 202);
 
   if (!(gameObj.game_state || gameObj.instructions_state || gameObj.game_over))
   {
@@ -860,19 +1016,23 @@ function draw() {
       
         rectMode(CORNER);
         push();
+          
           background(100, 135, 152);
+          push();
+          draw_bg();
+          pop();
         if (!gameObj.game_won){
           push();
-            fill(21, 53, 68);
+            fill('#FFD700');
             textSize(40);
-            text('Game Over!', width/2 - 100, height/2 - 45);
+            text('Game Over!', width/2 - 115, height/2 - 45);
           pop(); 
         }
         else{
           push();
             fill(21, 53, 68);
             textSize(40);
-            text('Game Won!', width/2 - 100, height/2 - 45);
+            text('Game Won!', width/2 - 115, height/2 - 45);
           pop(); 
         }
         push();
@@ -932,7 +1092,7 @@ function draw() {
 
     push();
         textSize(20);
-        fill('#542946');
+        fill('#FFD700');
         text('Score:  ' + gameObj.player.score, 300, 18);
     pop();
     if (gameObj.player.score == 20) {
